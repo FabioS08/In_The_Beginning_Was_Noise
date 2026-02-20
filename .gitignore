@@ -1,5 +1,5 @@
 # Dataset folder
-datasets/
+CelebA-HQ/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
