@@ -21,6 +21,13 @@ class TimeStepEmbedding(nn.Module):
 
         self.embeddingDimension = embeddingDimension
 
+        # Precompute the omegas here to speedup the computation at training/inference time
+        halfDim = self.embeddingDimension // 2
+        exponents = torch.arange(halfDim, dtype = torch.float32) * -(math.log(10000.0) / halfDim)
+
+        # Registering as a buffer automatically handles device placement (i.e. CPU / GPU)
+        self.register_buffer('omegas', torch.exp(exponents))
+
         # Define the linear layers to be used for the Positional Encoding
         self.layers = nn.Sequential(
                                         nn.Linear(self.embeddingDimension, self.embeddingDimension * 4),
@@ -31,18 +38,17 @@ class TimeStepEmbedding(nn.Module):
 
 
     def forward(self, t: torch.Tensor) -> torch.Tensor:
+
+        '''
+            t: Time Tensor    ->    [BatchSize]
+        '''
         return self.layers(self.SinusoidalPositionalEncoding(t))
 
 
     def SinusoidalPositionalEncoding(self, t: torch.Tensor) -> torch.Tensor:
 
-        device = t.device
-
-        pe = torch.zeros(t.shape[0], self.embeddingDimension, device = device)
-        halfDim = self.embeddingDimension // 2
-        exponents = torch.arange(halfDim, device = device) * -(math.log(10000.0) / halfDim)
-        omegas = torch.exp(exponents)
-        products = t.unsqueeze(1) * omegas
+        products = t.unsqueeze(1) * self.omegas
+        pe = torch.zeros(t.shape[0], self.embeddingDimension, device = t.device)
 
         pe[:, 0::2] = torch.sin(products)
         pe[:, 1::2] = torch.cos(products)
