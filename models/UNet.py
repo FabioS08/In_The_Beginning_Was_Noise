@@ -26,6 +26,7 @@ class TimeStepEmbedding(nn.Module):
         exponents = torch.arange(halfDim, dtype = torch.float32) * -(math.log(10000.0) / halfDim)
 
         # Registering as a buffer automatically handles device placement (i.e. CPU / GPU)
+        self.omegas: torch.Tensor
         self.register_buffer('omegas', torch.exp(exponents))
 
         # Define the linear layers to be used for the Positional Encoding
@@ -47,6 +48,7 @@ class TimeStepEmbedding(nn.Module):
 
     def SinusoidalPositionalEncoding(self, t: torch.Tensor) -> torch.Tensor:
 
+        t = t.float()
         products = t.unsqueeze(1) * self.omegas
         pe = torch.zeros(t.shape[0], self.embeddingDimension, device = t.device)
 
@@ -126,7 +128,70 @@ class ResBlock(nn.Module):
         return out + self.reshape(x)
 
 
+#* Implement the Attention Block
+class MultiHeadAttentionBlock(nn.Module):
 
+    def __init__(self, numHeads: int, inChannels: int, numGroups: int = 32):
+
+        '''
+            :param numHeads: The number of channels of the tensor in input
+            :type numHeads: int
+
+            :param inChannels: The number of channels of the tensor in input
+            :type inChannels: int
+
+            :param numGroups: The number of channels of the tensor in input
+            :type numGroups: int
+        
+        '''
+
+        super().__init__()
+
+        if inChannels % numHeads != 0:
+            raise ValueError(f'The number of channels must be divisible by the number of attention head: got {inChannels} (inChannels) / {numHeads} (numHeads) = {inChannels / numHeads}')
+        
+        self.numHeads = numHeads
+        self.hiddenDimension = inChannels // numHeads   # The typical notation is d_k
+
+        self.norm = nn.GroupNorm(num_channels = inChannels, num_groups = numGroups)
+
+        # Perform the projections to generate the Query, Key and Value Matrices
+        self.Q = nn.Conv2d(in_channels = inChannels, out_channels = inChannels, kernel_size = 1)
+        self.K = nn.Conv2d(in_channels = inChannels, out_channels = inChannels, kernel_size = 1)
+        self.V = nn.Conv2d(in_channels = inChannels, out_channels = inChannels, kernel_size = 1)
+
+        # Output Projection - At the beginning the Zero-Initialization Trick is used to ensure that the attention block acts as an identity function (i.e. the variance of the network is kept stable at the start of the training)
+        self.O = nn.Conv2d(in_channels = inChannels, out_channels = inChannels, kernel_size = 1)
+        nn.init.zeros_(self.O.weight)
+        if self.O.bias is not None:
+            nn.init.zeros_(self.O.bias)
+
+
+    def forward(self, x):
+        
+        '''
+            x: Input Image Tensor       -> [BatchSize, inChannels, H, W]
+        '''
+
+        B, C, H, W = x.shape
+        L = H * W 
+
+        # Normalize the input 
+        h = self.norm(x)
+
+        # Create the Q, K, V Matrices   ->  [BachSize, NumHeads, L, hiddenDimension]
+        Q = self.Q(h).reshape(B, self.numHeads, self.hiddenDimension, L).transpose(2, 3)
+        K = self.K(h).reshape(B, self.numHeads, self.hiddenDimension, L).transpose(2, 3)
+        V = self.V(h).reshape(B, self.numHeads, self.hiddenDimension, L).transpose(2, 3)
+
+        # Compute the Attention Output   ->  [BachSize, NumHeads, L, hiddenDimension]
+        out = F.scaled_dot_product_attention(Q, K, V)
+    
+        # Reshape the output   ->  [BachSize, inChannels, H, W]
+        out = out.transpose(2, 3).reshape(B, C, H, W)
+        out = self.O(out)
+        
+        return x + out
 
 
 
