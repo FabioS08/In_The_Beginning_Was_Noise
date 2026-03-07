@@ -38,6 +38,7 @@ class TimeStepEmbedding(nn.Module):
             raise ValueError(f"As standard, the Sinusoidal Positional Encoding requires an even embedding dimension, but got {embeddingDimension} instead.")
 
         self.embeddingDimension = embeddingDimension
+        self.outputDimension = embeddingDimension * 4
 
         # Precompute the omegas here to speedup the computation at training/inference time
         halfDim = self.embeddingDimension // 2
@@ -49,9 +50,9 @@ class TimeStepEmbedding(nn.Module):
 
         # Define the linear layers to be used for the Positional Encoding
         self.layers = nn.Sequential(
-                                        nn.Linear(self.embeddingDimension, self.embeddingDimension * 4),
+                                        nn.Linear(self.embeddingDimension, self.outputDimension),
                                         nn.SiLU(),
-                                        nn.Linear(self.embeddingDimension * 4, self.embeddingDimension * 4)
+                                        nn.Linear(self.outputDimension, self.outputDimension)
                                         
                                     )
 
@@ -458,7 +459,7 @@ class UNet(nn.Module):
 
                 self.encoder.append(ResBlock(inChannels = currentChannels, 
                                              outChannels = param['outChannels'], 
-                                             dTimeEmbedding = timeStepEmbedding.embeddingDimension * 4, 
+                                             dTimeEmbedding = timeStepEmbedding.outputDimension, 
                                              numGroups = param.get('numGroups', 32), 
                                              dropout = param.get('dropout', 0.1)))
                 
@@ -493,7 +494,7 @@ class UNet(nn.Module):
 
                 self.bottleneck.append(ResBlock(inChannels = currentChannels, 
                                                 outChannels = param['outChannels'], 
-                                                dTimeEmbedding = timeStepEmbedding.embeddingDimension * 4, 
+                                                dTimeEmbedding = timeStepEmbedding.outputDimension, 
                                                 numGroups = param.get('numGroups', 32), 
                                                 dropout = param.get('dropout', 0.1)))
                 
@@ -524,7 +525,7 @@ class UNet(nn.Module):
                 
                 self.decoder.append(ResBlock(inChannels = actualChannels, 
                                              outChannels = param['outChannels'], 
-                                             dTimeEmbedding = timeStepEmbedding.embeddingDimension * 4, 
+                                             dTimeEmbedding = timeStepEmbedding.outputDimension, 
                                              numGroups = param.get('numGroups', 32), 
                                              dropout = param.get('dropout', 0.1)))
                 currentChannels = param['outChannels']
