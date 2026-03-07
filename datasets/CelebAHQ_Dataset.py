@@ -13,18 +13,25 @@ import os
 
 class CelebAHQ(Dataset):
 
+    '''
+        CelebA-HQ Dataset
+
+        It handles the downloading, extraction and loading phases of the dataset
+
+        Parameters
+        ----------
+        rootPath: pathlib.Path
+         The path to the folder where the dataset will be saved.
+
+        download: bool
+         Whether the dataset should be downlaoded if it is not already present in the rootPath.
+
+        transforms: Optional[T.Compose]
+         The transforms to apply to each image in the dataset. [Default: None]
+
+    '''
+
     def __init__(self, rootPath: pathlib.Path, download: bool = False, transforms: Optional[T.Compose] = None):
-
-        '''
-            :param rootPath: The path to the folder where the dataset will be saved
-            :type rootPath: pathlib.Path
-
-            :param download: Whether the dataset should be downlaoded if it is not already present in the rootPath
-            :type download: bool
-
-            :param transforms: The transforms to apply to each image in the dataset
-            :type transforms: Optional[T.Compose]
-        '''
 
         self.rootPath = rootPath
         self.transforms = transforms
