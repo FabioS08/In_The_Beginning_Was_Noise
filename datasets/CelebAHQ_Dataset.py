@@ -8,7 +8,6 @@ import PIL.Image
 import pathlib
 import gdown
 import PIL
-import os
 
 
 class CelebAHQ(Dataset):
@@ -65,10 +64,10 @@ class CelebAHQ(Dataset):
             finally:
 
                 # Clean up the zip file after extraction
-                if os.path.exists(self.zipPath):
-                    os.remove(self.zipPath)
+                if self.zipPath.exists():
+                    self.zipPath.unlink()
 
-        self.files = sorted(os.listdir(self.destPath), key = lambda x: int(x.split('.')[0]))
+        self.files = sorted(self.destPath.iterdir(), key = lambda x: int(x.stem))
             
 
 

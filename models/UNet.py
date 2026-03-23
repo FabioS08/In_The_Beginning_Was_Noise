@@ -485,7 +485,9 @@ class UNet(nn.Module):
                 raise ValueError(f'Unknown block type "{blockType}" in the encoder configuration. Expected "ResNet", "DownSample" or "Attention".')
             
             # Save the output channel dimension for the decoder to know about
-            skipChannelStack.append(currentChannels)
+            if blockType != 'Attention':
+                skipChannelStack.append(currentChannels)
+
 
         # 2. Build Bottleneck 
         for blockType, param in bottleneck:
@@ -509,7 +511,6 @@ class UNet(nn.Module):
                 
             else:
                 raise ValueError(f'Unknown block type "{blockType}" in the bottleneck configuration. Expected "ResNet" or "Attention".')
-
 
 
         # 3. Build Decoder

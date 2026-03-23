@@ -3,8 +3,8 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as F
 
-from typing import Tuple
-from UNet import UNet
+from typing import Literal, Tuple
+from models.UNet import UNet
 # =======================================================================================
 
 
@@ -40,7 +40,7 @@ class DDPM(nn.Module):
 
     '''
 
-    def __init__(self, unetModel: UNet, varianceSchedule: Tuple = ('linear', 1e-4, 0.02), T: int = 1000,):
+    def __init__(self, unetModel: UNet, varianceSchedule: Tuple[str, float, float] = ('linear', 1e-4, 0.02), T: int = 1000,):
 
         super().__init__()
 
