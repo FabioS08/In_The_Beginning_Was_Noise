@@ -38,7 +38,11 @@ def plotModelArchitecture(modelName: str, model: nn.Module, inputSize: List | Tu
             The function saves the visualization to disk and returns nothing.
     '''
 
-    outputPath = Path(outputDirectory) / Path(f'{modelName}.{format}')
+    if outputDirectory:
+        output = Path(outputDirectory) / Path(f'{modelName}.{format}')
+
+    else: 
+        output = modelName
 
     graph = draw_graph(
                         model,
@@ -51,7 +55,7 @@ def plotModelArchitecture(modelName: str, model: nn.Module, inputSize: List | Tu
                     
                     )
 
-    graph.visual_graph.render(modelName, format = format, cleanup = True, outfile = outputPath )
+    graph.visual_graph.render(output, format = format, cleanup = True)
     print(f"The '{modelName}' model architecture has been correctly saved!")
 
 

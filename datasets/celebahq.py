@@ -1,3 +1,6 @@
+# ====================================== LIBRARIES ======================================
+from datasets import registerDataset
+
 import torchvision.transforms as T
 from torch.utils.data import Dataset
 from zipfile import ZipFile
@@ -8,8 +11,10 @@ import PIL.Image
 import pathlib
 import gdown
 import PIL
+# =======================================================================================
 
 
+@registerDataset('celebahq')
 class CelebAHQ(Dataset):
 
     '''
@@ -97,11 +102,9 @@ class CelebAHQ(Dataset):
         print('[dim]=[/dim]' * (2 * l + 14) + '\n')
 
 
-
-
 if __name__ == "__main__":
 
-    datasetPath = pathlib.Path('/Users/fabioschiliro/Desktop/DDPM/datasets')
+    datasetPath = pathlib.Path('/Users/fabioschiliro/Documents/Projects/DDPM/datasets')
     transforms = T.Compose([
                                 T.ToTensor(),
                                 T.Normalize(mean = [0.5] * 3, std = [0.5] * 3)

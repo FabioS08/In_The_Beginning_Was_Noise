@@ -1,0 +1,16 @@
+name: diffusion
+channels:
+  - https://repo.anaconda.com/pkgs/main
+  - https://repo.anaconda.com/pkgs/r
+  - conda-forge
+dependencies:
+  - python=3.10
+  - numpy=1.26.4
+  - pytorch
+  - ipykernel
+  - torchvision
+  - matplotlib
+  - gdown
+  - rich
+  - torchinfo
+  - torchview

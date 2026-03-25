@@ -1,4 +1,4 @@
-from models.UNet import EncoderItem, DecoderItem, BottleneckItem
+from models.networks.blocks import EncoderItem, DecoderItem, BottleneckItem
 from typing import List
 
 # =============================================== Configuration Example ===============================================
@@ -115,4 +115,3 @@ decoderConfig: List[DecoderItem] = [
 
     # Notice: NO UpSample block here! 
 ]
-

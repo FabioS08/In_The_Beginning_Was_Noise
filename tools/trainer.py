@@ -53,7 +53,7 @@ class PlainTextFormatter(logging.Formatter):
 
 class DiffusionTrainer:
 
-    def __init__(self, model: nn.Module, dataloader: DataLoader, optimizer: Optimizer, lossFunction: nn.Module, device: torch.device, gradientAccumulationSteps: int = 1, checkpointSavingFrequency: int = 5, maxNumCheckpoints: int = 1, checkpointPath: Optional[Path] = None, scaler: Optional[GradScaler] = None, scheduler: Optional[LRScheduler] = None, maxGradNorm: Optional[float] = 10.0, logPath: Optional[Path] = None, checkpointDirectory: Optional[Path] = None):
+    def __init__(self, model: nn.Module, dataloader: DataLoader, optimizer: Optimizer, lossFunction: nn.Module, device: torch.device, ampType: Optional[torch.dtype], gradientAccumulationSteps: int = 1, checkpointSavingFrequency: int = 5, maxNumCheckpoints: int = 1, checkpointPathRestart: Optional[Path] = None, scheduler: Optional[LRScheduler] = None, maxGradNorm: Optional[float] = 10.0, logPath: Optional[Path] = None, checkpointDirectory: Optional[Path] = None):
 
         self.model = model.to(device)
         self.dataloader = dataloader
@@ -64,8 +64,9 @@ class DiffusionTrainer:
         self.gradientAccumulationSteps = gradientAccumulationSteps
         self.checkpointSavingFrequency = checkpointSavingFrequency
         self.maxNumCheckpoints = maxNumCheckpoints
-        self.checkpointPath = checkpointPath
-        self.scaler = scaler
+        self.checkpointPathRestart = checkpointPathRestart
+        self.amp = ampType
+        self.scaler = self.scaler = GradScaler() if ampType == torch.float16 else None
         self.scheduler = scheduler
         self.maxGradNorm = maxGradNorm
         
@@ -124,19 +125,21 @@ class DiffusionTrainer:
         if len(checkpoints) > self.maxNumCheckpoints:
             checkpoints[0].unlink()
 
+        log.info(f"[bold blue][INFO][/bold blue] The checkpoint 'Epoch_{epoch}.pth' has been correctly saved in: {checkpointPath}.\n")
+
     
     def _resumeFromCheckpoint(self):
 
-        if self.checkpointPath is None: 
+        if self.checkpointPathRestart is None: 
             return
 
-        if not self.checkpointPath.exists():
-            log.warning(f"[bold red][WARNING][/bold red] Checkpoint {self.checkpointPath} not found. Starting Training from scratch.")
+        if not self.checkpointPathRestart.exists():
+            log.warning(f"[bold red][WARNING][/bold red] Checkpoint {self.checkpointPathRestart} not found. Starting Training from scratch.")
             return
 
-        checkpoint = torch.load(self.checkpointPath, map_location = self.device)
+        checkpoint = torch.load(self.checkpointPathRestart, map_location = self.device)
 
-        log.info(f"[bold blue][INFO][/bold blue] Resuming training from checkpoint: {self.checkpointPath}")
+        log.info(f"[bold blue][INFO][/bold blue] Resuming training from checkpoint: {self.checkpointPathRestart}")
         log.info(f'[bold blue][INFO][/bold blue] Epoch: {checkpoint["epoch"]}   Loss: {checkpoint["loss"]}\n\n')
 
         
@@ -178,7 +181,7 @@ class DiffusionTrainer:
                     batch = batch.to(self.device)
 
                     # Forward pass
-                    with torch.autocast(device_type = self.device.type, enabled = self.scaler is not None):
+                    with torch.autocast(device_type = self.device.type, dtype = self.amp, enabled = self.amp is not None):
 
                         target, prediction = self.model(batch)
                         loss = self.lossFunction(prediction, target)

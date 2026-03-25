@@ -8,8 +8,8 @@
 ![Tech](https://img.shields.io/badge/Tech-PyTorch-informational)
 
 
-<p align="center">
-  <img src = "assets/Noise Image.png" width = "700">
+<p align = "center">
+  <img src = "assets/images/Noise Image.png" width = "700">
 </p>
 
 ## ⛓️ Table of Contents
@@ -51,26 +51,17 @@ The main goals followed in this repo are listed below:
 ### Foundations
 - [x] Repository setup
 - [ ] Training pipeline skeleton
-- [ ] DDPM implementation
+- [ ] Inference pipeline skeleton
+
 - [ ] Noise scheduler implementation
 - [ ] Sampling loop
 
-### Diffusion Improvements
-- [ ] Improved DDPM
-- [ ] DDIM sampling
-- [ ] Classifier guidance
-- [ ] Classifier-free guidance
-
-### Modern Diffusion Models
-- [ ] Latent Diffusion Models
-- [ ] Stable Diffusion components
-- [ ] Conditional generation
-- [ ] Transformer-based diffusion
+### Diffusion Models
+- [ ] DDPM implementation
 
 ### Documentation
 - [ ] Mathematical derivations
 - [ ] Paper summaries
-- [ ] Training tutorials
 
 </details>
 
@@ -93,6 +84,9 @@ In order to start experimenting with this repo, run the following commands:
     ```bash
     conda create -n $(basename $PWD) python=3.10
     ```
+
+    conda env create -f environment.yml
+    conda activate diffusion
 
 2. **Setup the Conda Environment**
 
