@@ -1,0 +1,124 @@
+site_name: In The Beginning Was Noise
+site_description: A hands-on implementation journey through diffusion models, from DDPM to modern architectures.
+site_author: Biagio Fabio Schilirò
+site_url: https://fabioschiliro.it/In_The_Beginning_Was_Noise/
+
+repo_name: FabioS08/In_The_Beginning_Was_Noise
+repo_url: https://github.com/FabioS08/In_The_Beginning_Was_Noise
+
+theme:
+  name: material
+  
+  palette:
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep blue
+      accent: amber
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep blue
+      accent: amber
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+  font:
+    text: Inter
+    code: JetBrains Mono
+
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.indexes
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+    - toc.follow
+
+  icon:
+    repo: fontawesome/brands/github
+    logo: material/blur
+
+  
+
+nav:
+  - Home: index.md
+  
+  - Papers:
+    - papers/index.md
+    - DDPM: papers/ddpm.md
+
+  - Architecture:
+    - architecture/index.md
+    - High-Level Overview: architecture/overview.md
+    - U-Net Architecture: architecture/unet.md
+    - Training Pipeline: architecture/training_pipeline.md
+
+  - Guides:
+    - guides/index.md
+    - Configuration Reference: guides/configuration.md
+    - Extending the Framework: guides/extending.md
+
+  - API Reference:
+    - api/index.md
+    - Models: api/models.md
+    - Networks: api/networks.md
+    - Datasets: api/datasets.md
+    - Tools: api/tools.md
+
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - attr_list
+  - md_in_html
+  - tables
+  - footnotes
+  - toc:
+      permalink: true
+  - def_list
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.critic
+
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
+
+
+extra:
+  generator: False
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/FabioS08
+
+
+copyright: 2026 Copyright &copy; B. Fabio Schilirò
