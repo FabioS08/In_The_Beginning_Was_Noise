@@ -1,14 +1,14 @@
-name: diffusion
+name: ITBWN
 channels:
   - https://repo.anaconda.com/pkgs/main
   - https://repo.anaconda.com/pkgs/r
   - conda-forge
 dependencies:
-  - python=3.10
+  - python=3.12
   - numpy=1.26.4
-  - pytorch
+  - pytorch=2.8.0
+  - torchvision=0.23.0
   - ipykernel
-  - torchvision
   - matplotlib
   - gdown
   - rich

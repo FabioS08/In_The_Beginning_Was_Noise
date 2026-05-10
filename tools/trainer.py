@@ -9,6 +9,8 @@ from torch.utils.data import DataLoader
 
 import logging
 from rich.text import Text
+from rich.panel import Panel
+from rich.console import Console
 from rich.logging import RichHandler
 
 import time
@@ -41,6 +43,20 @@ class PlainTextFormatter(logging.Formatter):
         # Strip the markup using Rich's Text class
         if isinstance(record.msg, str):
             record.msg = Text.from_markup(record.msg).plain
+
+        else:
+
+            try:
+                
+                console = Console(width = 120, color_system = None)
+                
+                with console.capture() as capture:
+                    console.print(record.msg)
+
+                record.msg = capture.get().strip()
+
+            except Exception:
+                pass
             
         # Format the record as usual
         result = super().format(record)
@@ -113,9 +129,7 @@ class DiffusionTrainer:
                         "optimizer_state_dict": self.optimizer.state_dict(),
                         "scaler_state_dict": self.scaler.state_dict() if self.scaler else None,
                         "scheduler_state_dict": self.scheduler.state_dict() if self.scheduler else None,
-                        "loss": epochLoss,
-                        "torch_rng_state": torch.get_rng_state(),
-                        "cuda_rng_state": torch.cuda.get_rng_state_all() if torch.cuda.is_available() else None
+                        "loss": epochLoss
                     }
         
         torch.save(checkpoint, checkpointPath)
@@ -140,7 +154,7 @@ class DiffusionTrainer:
         checkpoint = torch.load(self.checkpointPathRestart, map_location = self.device)
 
         log.info(f"[bold blue][INFO][/bold blue] Resuming training from checkpoint: {self.checkpointPathRestart}")
-        log.info(f'[bold blue][INFO][/bold blue] Epoch: {checkpoint["epoch"]}   Loss: {checkpoint["loss"]}\n\n')
+        log.info(f'[bold blue][INFO][/bold blue] Epoch: {checkpoint["epoch"]}   Loss: {checkpoint["loss"]:.6f}')
 
         
         self.model.load_state_dict(checkpoint["model_state_dict"])
@@ -151,18 +165,59 @@ class DiffusionTrainer:
             
         if self.scheduler and checkpoint.get("scheduler_state_dict"):
             self.scheduler.load_state_dict(checkpoint["scheduler_state_dict"])
-
-        if "torch_rng_state" in checkpoint:
-            torch.set_rng_state(checkpoint["torch_rng_state"])
-
-        if torch.cuda.is_available() and checkpoint.get("cuda_rng_state") is not None:
-            torch.cuda.set_rng_state_all(checkpoint["cuda_rng_state"])
             
         self.startEpoch = checkpoint["epoch"] + 1
 
 
+    def _printTrainConfiguration(self, epochs: int):
+
+        '''
+        Logs the Model Architecture and the Training Parameters used at configuration time before starting the training loop.
+        '''
+
+        # Use a plain console to render the panels into strings that can be used by the logger
+        dummyConsole = Console(width = 100, color_system = None)
+
+        # Model Architecture Box
+        model = str(self.model)
+        modelBox = Panel(model, title = "MODEL ARCHITECTURE")
+        
+        with dummyConsole.capture() as capture:
+            dummyConsole.print(modelBox)
+
+        modelBoxSTR = capture.get().strip()
+
+        # Training Parameters Box
+        trainingParam = (
+
+                            f"{'Training Epochs:':<30} {self.startEpoch} -> {epochs}\n"
+                            f"{'Batch Size:':<30} {self.dataloader.batch_size if hasattr(self.dataloader, 'batch_size') else 'N/A'}\n"
+                            f"{'Optimizer:':<30} {self.optimizer.__class__.__name__}\n"
+                            f"{'Learning Rate:':<30} {self.optimizer.param_groups[0]['lr']} (Initial)\n"
+                            f"{'Scheduler:':<30} {self.scheduler.__class__.__name__ if self.scheduler else 'None'}\n"
+                            f"{'Loss Function:':<30} {self.lossFunction.__class__.__name__}\n"
+                            f"{'Grad Accumulation Steps:':<30} {self.gradientAccumulationSteps}\n"
+                            f"{'Max Grad Norm:':<30} {self.maxGradNorm}\n"
+                            f"{'AMP (Mixed Precision):':<30} {f'Enabled ({self.amp})' if self.amp else 'Disabled'}\n"
+                            f"{'Checkpoint Frequency:':<30} Every {self.checkpointSavingFrequency} epochs\n"
+                            f"{'Device:':<30} {self.device}"
+
+                        )
+
+        trainingBox = Panel(trainingParam, title = "TRAINING")
+        
+        with dummyConsole.capture() as capture:
+            dummyConsole.print(trainingBox)
+        trainingBoxSTR = capture.get().strip()
+
+        log.info(f"\n[bold cyan]{modelBoxSTR}[/bold cyan]\n")
+        log.info(f"\n[bold green]{trainingBoxSTR}[/bold green]\n\n")
+
+
     def train(self, epochs: int):
 
+        self._printTrainConfiguration(epochs)
+        
         log.info(f"[bold blue][INFO][/bold blue] Starting Training for '{self.model._get_name()}' Model. Logs will be stored in '{self.logPath}'.\n")
         numBatches = len(self.dataloader)
 
@@ -220,14 +275,27 @@ class DiffusionTrainer:
                             self.scheduler.step()
 
                     elapsed = time.time() - epochStart
-                    eta = (elapsed / (i + 1)) * (numBatches - (i + 1))
-                    log.info(f"[bold green][TRAIN][/bold green] Epoch: {epoch}/{epochs} | Batch: {i + 1}/{numBatches} | ETA: {str(datetime.timedelta(seconds=int(eta)))} | LR: {self.optimizer.param_groups[0]['lr']:.6f} | Loss: {epochLoss/(i + 1):.4f} | GradNorm: {gradNorm}")
+                    timePerBatch = elapsed / (i + 1)
+
+                    # Epoch ETA
+                    etaEpoch = timePerBatch * (numBatches - (i + 1))
+                    etaEpoch = str(datetime.timedelta(seconds = int(etaEpoch)))
+
+                    # Global ETA
+                    totalRemainingBatches = (numBatches - (i + 1)) + ((epochs - epoch) * numBatches)
+                    etaGlobal = timePerBatch * totalRemainingBatches
+                    etaGlobal = str(datetime.timedelta(seconds = int(etaGlobal)))
+
+                    log.info(f"[bold green][TRAIN][/bold green] Epoch: {epoch}/{epochs} | Batch: {i + 1}/{numBatches} | ETA: ({etaEpoch}) [{etaGlobal}] | LR: {self.optimizer.param_groups[0]['lr']:.6f} | Loss: {epochLoss/(i + 1):.6f} | GradNorm: {gradNorm}")
 
                 # Save Checkpoint
                 if (epoch == 1) or (epoch % self.checkpointSavingFrequency == 0):
                     self._saveCheckpoint(epoch, epochLoss / numBatches)
 
                 log.info(f"[bold green][TRAIN][/bold green] Epoch: {epoch}/{epochs} finished!\n")
+
+        except Exception as e:
+            log.exception(f"[bold red][ERROR][/bold red] An error occurred during training: {str(e)}")
 
         finally:
 

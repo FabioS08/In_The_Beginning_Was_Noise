@@ -18,13 +18,16 @@ config = Config(
                                             ),
 
                     training = TrainingConfig(
-                                                    batchSize = 32,
+                                                    batchSize = 1,
                                                     epochs = 500,
                                                     learningRate = 0.0001,
                                                     optimizer = 'AdamW',
+                                                    optimizerParams = {},
+                                                    scheduler = '',
+                                                    schedulerParams = {},
                                                     loss = 'MSE',
                                                     gradientAccumulationSteps = 1,
-                                                    ampType = 'None',
+                                                    ampType = 'float16',
                                                     checkpointSavingFrequency = 5,
                                                     maxNumCheckpoints = 2,
                                                     checkpointPathRestart = '',

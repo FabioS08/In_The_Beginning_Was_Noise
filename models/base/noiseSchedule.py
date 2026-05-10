@@ -33,6 +33,13 @@ class NoiseSchedule(ABC):
         ...
 
 
+    def __repr__(self):
+
+        params = ", ".join(f"{k} = {v}" for k, v in self.__dict__.items())
+        
+        return f"{self.__class__.__name__}({params})"
+
+
 class LinearSchedule(NoiseSchedule):
 
     '''
@@ -53,6 +60,7 @@ class LinearSchedule(NoiseSchedule):
 
         self.betaStart = betaStart
         self.betaEnd = betaEnd
+
 
     def __call__(self, T: int) -> torch.Tensor:
 

@@ -3,6 +3,7 @@
 > **A hands-on implementation journey through diffusion models, from DDPM to modern architectures.**
 
 ![Status](https://img.shields.io/badge/Status-In_Progress-yellow)
+[![Docs](https://img.shields.io/badge/Docs-Online-brightgreen?logo=materialformkdocs&logoColor=white)](https://fabioschiliro.it/In_The_Beginning_Was_Noise/)
 ![Type](https://img.shields.io/badge/Type-Individual_Project-blue)
 ![Focus](https://img.shields.io/badge/Focus-Diffusion_Models-orange)
 ![Tech](https://img.shields.io/badge/Tech-PyTorch-informational)
@@ -50,29 +51,37 @@ The main goals followed in this repo are listed below:
 
 ### Foundations
 - [x] Repository setup
-- [ ] Training pipeline skeleton
-- [ ] Inference pipeline skeleton
+- [x] Training pipeline skeleton
+- [x] Inference pipeline skeleton
 
-- [ ] Noise scheduler implementation
-- [ ] Sampling loop
+- [x] Noise scheduler implementation
+- [x] Sampling loop
 
 ### Diffusion Models
-- [ ] DDPM implementation
+- [x] DDPM implementation
 
 ### Documentation
-- [ ] Mathematical derivations
-- [ ] Paper summaries
+- [ ] DDPM Explaination and Documentation
+
+### Fixes
+- [ ] Logger problem in Colab
+
 
 </details>
 
 
 
 ## 🚀 Getting Started
-In order to start experimenting with this repo, run the following commands:
+In order to start experimenting with this repo, you can choose to use your compuer or execute the models on Colab; however, it is importart to follow the specific section to correctly run the code.
 
-(LOOK FOR environment.yml ->> conda env create -f environment.yml)
 
-1. **Clone the repository**
+<details>
+<summary><b>Execute on your computer 💻</b></summary> 
+<br>
+If you want to execute the models on your computer, just follow the commands below:
+<br></br>
+
+0. **Clone the repository**
 
     ```bash
     git clone https://github.com/your-username/in_the_beginning_was_noise.git
@@ -82,25 +91,97 @@ In order to start experimenting with this repo, run the following commands:
 1. **Create a Conda Environment**
 
     ```bash
-    conda create -n $(basename $PWD) python=3.10
+    conda env create -f environment.yml
     ```
 
-    conda env create -f environment.yml
-    conda activate diffusion
-
-2. **Setup the Conda Environment**
+2. **Active the Conda Environment**
 
     ```bash
-    conda activate $(basename $PWD)
-    pip install -r requirements.txt
+    conda activate ITBWN
     ```
 
+<br>
+In addition, if you want to remove the created environment, you can use the following commands:
+<br></br>
 
-Decide if to use it or not:
-when finished:
+1. **Deactivate the Conda Environment**
 
-- conda deactivate
-- conda remove -n myproject --all
+    ```bash
+    conda deactivate
+    ```
+
+2. **Delete all the packages installed in the environment and remove it**
+
+    ```bash
+    conda remove -n ITBWN --all
+    ```
+
+</details>
+
+<br>
+
+<details>
+<summary><b>Execute on Colab 📡</b></summary> 
+<br>
+If you want to execute the models on Google Colab, just run the commands below:
+<br></br>
+
+0. **Clone the repository**
+
+    ```bash
+    git clone https://github.com/your-username/in_the_beginning_was_noise.git
+    cd in_the_beginning_was_noise
+    ```
+
+1. **Install the package to use Conda on Colab**
+
+    ```bash
+    !pip install -q condacolab
+    ```
+  
+2. **Import and initialize the package**
+
+    ```bash
+    import condacolab
+    condacolab.install()
+    ```
+
+   *⚠️ Note: This step usually restarts the runtime automatically after installation, just run the commands at step 3 after this event.*
+
+3. **Install the dependencies listed in the environment file**
+
+    ```bash
+    !mamba env update -n base -f environment.yml
+    ```
+
+*⚠️ Note: Up to now, the rich logger seems to have problems when executed on Colab, not showing any output in the running cell (e.g. during training). For the training process you can consult the generated log file to monitor the process (i.e. close and open the file occasionally to see the update on the file itself). The problem will be fixed as soon as possible.*
+
+</details>
+
+
+## 💡 Models Usage
+In this section you can understand how to use the implemented models both for training and inference purposes.
+Be aware to look at the specific model subsection for every possible difference with respect to a traditional execution. 
+
+For both the scenarios below you can use the `-h / --help` flag to understand the behaviour. 
+
+### Training
+The training can be performed using the following command:
+
+  ```python
+  python train.py --config configs.modelConfiguration
+  ```
+
+### Inference
+The inference can be performed using the following command:
+
+  ```python
+  python inference.py --config configs.ddpm_celebahq \
+    --checkpoint /path/to/Epoch_100.pth \
+    --output-dir ./generated \
+    --num-images 4 \
+    --image-size 256
+  ```
 
 
 ## 📖 References and Citation

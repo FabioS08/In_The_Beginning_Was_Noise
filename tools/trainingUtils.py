@@ -7,7 +7,7 @@ from torch.optim import Adam, AdamW, SGD, RMSprop, Optimizer
 from torch.optim.lr_scheduler import CosineAnnealingLR, StepLR, ExponentialLR, LinearLR, LRScheduler
 
 import platform
-from typing import List, Optional
+from typing import Optional
 # =======================================================================================
 
 

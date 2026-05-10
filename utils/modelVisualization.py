@@ -1,12 +1,9 @@
 # ====================================== LIBRARIES ======================================
-from torchview import draw_graph
 from typing import List, Tuple
 from pathlib import Path
 
 import torch
 from torch import nn
-
-from torchinfo import summary
 # =======================================================================================
 
 
@@ -37,6 +34,8 @@ def plotModelArchitecture(modelName: str, model: nn.Module, inputSize: List | Tu
         None
             The function saves the visualization to disk and returns nothing.
     '''
+
+    from torchview import draw_graph
 
     if outputDirectory:
         output = Path(outputDirectory) / Path(f'{modelName}.{format}')
@@ -80,5 +79,7 @@ def printModelSummary(model: nn.Module, inputSize: List | Tuple | torch.Size, ve
         None
             The function prints the model summary to the console and returns nothing.
     '''
+
+    from torchinfo import summary
 
     summary(model, input_size = inputSize, verbose = verbose)

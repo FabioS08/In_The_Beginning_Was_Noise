@@ -103,6 +103,7 @@ class BaseDiffusion(nn.Module):
         '''
         ...
 
+
     @abstractmethod
     def sample(self, batchSize: int, imageSize: Tuple[int, int] | int, device: torch.device) -> torch.Tensor:
 
