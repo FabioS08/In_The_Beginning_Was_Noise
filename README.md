@@ -2,12 +2,18 @@
 
 > **A hands-on implementation journey through diffusion models, from DDPM to modern architectures.**
 
-![Status](https://img.shields.io/badge/Status-In_Progress-yellow)
-[![Docs](https://img.shields.io/badge/Docs-Online-brightgreen?logo=materialformkdocs&logoColor=white)](https://fabioschiliro.it/In_The_Beginning_Was_Noise/)
-![Type](https://img.shields.io/badge/Type-Individual_Project-blue)
-![Focus](https://img.shields.io/badge/Focus-Diffusion_Models-orange)
-![Tech](https://img.shields.io/badge/Tech-PyTorch-informational)
+<p align = "center">
+  <img src = "https://img.shields.io/badge/Status-In_Progress-yellow" alt = "Status">
+  <img src = "https://img.shields.io/badge/Type-Individual_Project-blue" alt = "Type">
+  <img src = "https://img.shields.io/badge/Focus-Diffusion_Models-orange" alt = "Focus">
+  <img src = "https://img.shields.io/badge/Tech-PyTorch-informational" alt = "Tech">
+</p>
 
+<p align = "center">
+  <a href = "https://fabioschiliro.it/In_The_Beginning_Was_Noise/">
+    <img src = "assets/badges/docs.svg" alt = "Read the Documentation" height = "36">
+  </a>
+</p>
 
 <p align = "center">
   <img src = "assets/images/Noise Image.png" width = "700">
